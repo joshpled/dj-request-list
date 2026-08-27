@@ -182,7 +182,6 @@ export default function AdminPage() {
             {message && <p className="form-error" role="alert">{message}</p>}
             <button type="submit">Unlock dashboard <span aria-hidden="true">→</span></button>
           </form>
-          <p className="setup-note">Fresh install setup PIN: <strong>2468</strong>. Change it from Settings before publishing.</p>
         </section>
       </main>
     );

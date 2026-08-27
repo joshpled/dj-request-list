@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Open `/admin` and use the fresh-install setup PIN `2468`. Change the PIN from **Event settings** before publishing. The dashboard generates the private guest link and its QR code after sign-in.
+Open `/admin`. Local preview uses setup PIN `2468`; production uses the private PIN supplied at publish time. Change the PIN from **Event settings** whenever needed. The dashboard generates the private guest link and its QR code after sign-in.
 
 ## Included in version one
 
