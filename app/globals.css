@@ -182,8 +182,8 @@ button {
 .counter span { color: var(--gold-muted); }
 
 .title-block {
-  max-width: 650px;
-  margin: 48px auto 38px;
+  max-width: 590px;
+  margin: 38px auto 30px;
   text-align: center;
 }
 
@@ -191,20 +191,11 @@ button {
   margin: 7px 0 17px;
   color: #f7dda0;
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(42px, 8vw, 72px);
+  font-size: clamp(36px, 6vw, 56px);
   font-style: italic;
   font-weight: 400;
   line-height: 0.98;
   text-wrap: balance;
-}
-
-.title-block > p:last-child {
-  max-width: 560px;
-  margin: 0 auto;
-  color: #b4a17d;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 18px;
-  line-height: 1.55;
 }
 
 .request-form {
@@ -215,6 +206,52 @@ button {
 }
 
 .request-form label { display: grid; gap: 9px; }
+.song-search { position: relative; }
+.search-spinner {
+  position: absolute;
+  top: 21px;
+  right: 18px;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(239,210,138,.22);
+  border-top-color: var(--gold-bright);
+  border-radius: 50%;
+  animation: catalog-spin .7s linear infinite;
+}
+.song-suggestions {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 7px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid rgba(200,157,80,.48);
+  border-radius: 15px;
+  background: #100c15;
+  box-shadow: 0 22px 48px rgba(0,0,0,.54);
+}
+.song-suggestions button {
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 13px 16px;
+  gap: 4px;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(200,157,80,.14);
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.song-suggestions button:last-child { border-bottom: 0; }
+.song-suggestions button:hover,
+.song-suggestions button:focus-visible { background: rgba(200,157,80,.1); outline: none; }
+.song-suggestions strong { color: #f0d797; font: 17px Georgia, 'Times New Roman', serif; }
+.song-suggestions span { padding: 0; color: #9d8e73; font-size: 12px; }
+@keyframes catalog-spin { to { transform: rotate(360deg); } }
 label > span { color: #c6a767; }
 label em { font-style: normal; color: #7f725d; letter-spacing: .12em; }
 .field-hint { color: #766b59; font-size: 11px; line-height: 1.4; }
@@ -378,9 +415,8 @@ footer { padding: 38px 10px 0; text-align: center; }
   .request-card::before, .request-card::after { width: 8px; }
   .card-intro { padding-bottom: 18px; }
   .status-line, .counter { font-size: 9px; letter-spacing: .14em; }
-  .title-block { margin: 39px auto 30px; }
-  .title-block h2 { font-size: clamp(42px, 13vw, 58px); }
-  .title-block > p:last-child { font-size: 16px; }
+  .title-block { margin: 32px auto 25px; }
+  .title-block h2 { font-size: clamp(34px, 10.5vw, 46px); }
   .form-grid { grid-template-columns: 1fr; }
   .marquee-label { padding-inline: 17px; letter-spacing: .17em; }
 }

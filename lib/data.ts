@@ -21,7 +21,6 @@ export async function getPublicEvent(token: string, deviceId: string) {
   const now = Date.now();
   return {
     eventName: settings.event_name,
-    welcomeMessage: settings.welcome_message,
     requestLimit: settings.request_limit,
     closingTime: settings.closing_time,
     requestCount: Number(countRow?.count ?? 0),
@@ -107,7 +106,6 @@ export async function getAdminData() {
   return {
     settings: {
       eventName: settings.event_name,
-      welcomeMessage: settings.welcome_message,
       requestLimit: settings.request_limit,
       closingTime: settings.closing_time,
       guestToken: settings.guest_token,
@@ -127,16 +125,15 @@ export async function setRequestStatus(id: string, status: unknown) {
 
 export async function updateSettings(input: Record<string, unknown>) {
   const eventName = clean(input.eventName, 100);
-  const welcomeMessage = clean(input.welcomeMessage, 240);
   const requestLimit = Number(input.requestLimit);
   const rawClosing = clean(input.closingTime, 40);
   const closingTime = rawClosing && !Number.isNaN(new Date(rawClosing).getTime()) ? new Date(rawClosing).toISOString() : null;
-  if (!eventName || !welcomeMessage || !Number.isInteger(requestLimit) || requestLimit < 1 || requestLimit > 25) {
-    return { ok: false as const, error: 'Check the event name, welcome message, and request limit.' };
+  if (!eventName || !Number.isInteger(requestLimit) || requestLimit < 1 || requestLimit > 25) {
+    return { ok: false as const, error: 'Check the event name and request limit.' };
   }
   await getD1().prepare(`UPDATE event_settings
-    SET event_name = ?, welcome_message = ?, request_limit = ?, closing_time = ?, updated_at = ? WHERE id = 1`)
-    .bind(eventName, welcomeMessage, requestLimit, closingTime, new Date().toISOString())
+    SET event_name = ?, request_limit = ?, closing_time = ?, updated_at = ? WHERE id = 1`)
+    .bind(eventName, requestLimit, closingTime, new Date().toISOString())
     .run();
   return { ok: true as const };
 }
@@ -183,4 +180,3 @@ export async function changeAdminPin(currentPin: unknown, newPin: unknown) {
     .run();
   return { ok: true as const };
 }
-

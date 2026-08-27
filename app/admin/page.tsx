@@ -15,7 +15,6 @@ type SongRequest = {
 };
 type Settings = {
   eventName: string;
-  welcomeMessage: string;
   requestLimit: number;
   closingTime: string | null;
   guestToken: string;
@@ -216,7 +215,6 @@ export default function AdminPage() {
           <div className="settings-layout">
             <form className="settings-form" onSubmit={saveSettings}>
               <label><span>Event name</span><input name="eventName" defaultValue={data.settings.eventName} required maxLength={100} /></label>
-              <label><span>Welcome message</span><textarea name="welcomeMessage" defaultValue={data.settings.welcomeMessage} required maxLength={240} /></label>
               <div className="form-grid"><label><span>Requests per device</span><input name="requestLimit" type="number" min="1" max="25" defaultValue={data.settings.requestLimit} required /></label><label><span>Request line closes</span><input name="closingTime" type="datetime-local" defaultValue={dateTimeLocal(data.settings.closingTime)} /></label></div>
               <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save event settings'}</button>
             </form>
