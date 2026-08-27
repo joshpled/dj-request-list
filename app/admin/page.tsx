@@ -43,6 +43,7 @@ export default function AdminPage() {
   const [qrCode, setQrCode] = useState('');
   const [saving, setSaving] = useState(false);
   const [requestAction, setRequestAction] = useState<string | null>(null);
+  const [clearConfirmId, setClearConfirmId] = useState<string | null>(null);
 
   const loadData = useCallback(async (quiet = false) => {
     try {
@@ -116,6 +117,7 @@ export default function AdminPage() {
 
   async function markPlayed(id: string) {
     const previous = data;
+    setClearConfirmId(null);
     setRequestAction(id);
     setMessage('');
     setData((current) => current ? {
@@ -134,8 +136,12 @@ export default function AdminPage() {
   }
 
   async function clearRequest(request: SongRequest) {
-    if (!window.confirm(`Clear “${request.song_title}” from the request list? This cannot be undone.`)) return;
+    if (clearConfirmId !== request.id) {
+      setClearConfirmId(request.id);
+      return;
+    }
     const previous = data;
+    setClearConfirmId(null);
     setRequestAction(request.id);
     setMessage('');
     setData((current) => current ? {
@@ -279,7 +285,7 @@ export default function AdminPage() {
               <div className="request-time"><time dateTime={request.created_at}>{new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(request.created_at))}</time></div>
               <div className="request-actions" aria-label={`Actions for ${request.song_title}`}>
                 <button type="button" className={`played-action ${request.status === 'Played' ? 'is-played' : ''}`} onClick={() => markPlayed(request.id)} disabled={request.status === 'Played' || requestAction === request.id} aria-pressed={request.status === 'Played'}>Played</button>
-                <button type="button" className="clear-action" onClick={() => clearRequest(request)} disabled={requestAction === request.id}>Clear</button>
+                <button type="button" className={`clear-action ${clearConfirmId === request.id ? 'is-confirming' : ''}`} onClick={() => clearRequest(request)} disabled={requestAction === request.id} aria-pressed={clearConfirmId === request.id}>{clearConfirmId === request.id ? 'Clear?' : 'Clear'}</button>
               </div>
             </article>
           ))}

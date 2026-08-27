@@ -622,6 +622,11 @@ textarea {
 }
 .request-actions .played-action:disabled { cursor: default; opacity: 1; }
 .request-actions .clear-action { border-color: rgba(154,119,112,.48); color: #cba69e; }
+.request-actions .clear-action.is-confirming {
+  border-color: rgba(201,126,111,.8);
+  background: rgba(154,78,70,.24);
+  color: #f0c0b5;
+}
 .empty-list { padding: 58px 20px; text-align: center; color: #837660; }
 .empty-list > span { color: #d2ad60; font-size: 40px; }
 .empty-list h3 { margin: 13px 0 7px; }
