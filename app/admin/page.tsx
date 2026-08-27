@@ -96,13 +96,17 @@ export default function AdminPage() {
   async function login(loginEvent: FormEvent) {
     loginEvent.preventDefault();
     setMessage('');
-    const response = await fetch('/api/admin/session', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }),
-    });
-    const result = await response.json();
-    if (!response.ok) return setMessage(result.error ?? 'Unable to unlock.');
-    setPin('');
-    await loadData();
+    try {
+      const response = await fetch('/api/admin/session', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) return setMessage(result.error ?? 'Unable to unlock. Please try again.');
+      setPin('');
+      await loadData();
+    } catch {
+      setMessage('Unable to unlock. Check your connection and try again.');
+    }
   }
 
   async function logout() {

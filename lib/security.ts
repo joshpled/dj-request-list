@@ -1,4 +1,5 @@
 const encoder = new TextEncoder();
+const PIN_HASH_ITERATIONS = 100_000;
 
 function toBase64Url(bytes: Uint8Array) {
   let binary = '';
@@ -26,7 +27,7 @@ export async function hashPin(pin: string, salt = randomToken(18)) {
     ['deriveBits'],
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt: encoder.encode(salt), iterations: 120_000 },
+    { name: 'PBKDF2', hash: 'SHA-256', salt: encoder.encode(salt), iterations: PIN_HASH_ITERATIONS },
     material,
     256,
   );
@@ -102,4 +103,3 @@ export async function clientKey(request: Request) {
   const agent = request.headers.get('user-agent') ?? 'unknown';
   return sha256(`${address}|${agent}`);
 }
-
