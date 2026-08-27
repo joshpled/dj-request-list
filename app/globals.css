@@ -502,7 +502,7 @@ footer { padding: 38px 10px 0; text-align: center; }
   font-weight: 800;
 }
 
-.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 28px; }
 .stat-card {
   display: grid;
   min-height: 160px;
@@ -577,7 +577,7 @@ textarea {
 .live-pill { padding: 9px 13px; border: 1px solid rgba(121,178,128,.26); border-radius: 99px; color: #a6c5a7; text-transform: uppercase; letter-spacing: .16em; font-size: 9px; font-weight: 800; }
 .live-pill i { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #89c78e; box-shadow: 0 0 0 5px rgba(137,199,142,.1); }
 .request-tools { display: grid; grid-template-columns: minmax(260px, 1fr) 150px 160px; gap: 12px; padding: 24px 0; }
-.request-tools select, .status-select select {
+.request-tools select {
   min-height: 52px;
   padding: 0 15px;
   border: 1px solid rgba(200,157,80,.3);
@@ -588,7 +588,7 @@ textarea {
 .request-list { display: grid; gap: 10px; }
 .request-row {
   display: grid;
-  grid-template-columns: 10px minmax(220px, 1fr) minmax(130px, .35fr) 150px;
+  grid-template-columns: 10px minmax(220px, 1fr) minmax(100px, .25fr) 190px;
   align-items: center;
   gap: 18px;
   padding: 18px 20px;
@@ -598,14 +598,30 @@ textarea {
 }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
 .status-new { background: #ddb55d; box-shadow: 0 0 0 5px rgba(221,181,93,.1); }
-.status-approved { background: #8dbb9c; box-shadow: 0 0 0 5px rgba(141,187,156,.1); }
 .status-played { background: #9889bc; box-shadow: 0 0 0 5px rgba(152,137,188,.1); }
-.status-declined { background: #9a7770; box-shadow: 0 0 0 5px rgba(154,119,112,.1); }
 .song-info h3 { margin: 0 0 4px; color: #efd28a; font: 24px Georgia, serif; }
 .song-info p { margin: 0; color: #a9987a; font-size: 13px; }
 .song-info blockquote { margin: 10px 0 0; color: #8f8068; font: italic 14px Georgia, serif; }
 .request-time { color: #6f6658; font-size: 11px; }
-.status-select select { width: 100%; min-height: 44px; }
+.request-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.request-actions button {
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid rgba(200,157,80,.38);
+  background: transparent;
+  box-shadow: none;
+  color: #d9bb78;
+  font-size: 9px;
+  letter-spacing: .14em;
+}
+.request-actions .played-action.is-played {
+  border-color: rgba(152,137,188,.55);
+  background: rgba(152,137,188,.18);
+  color: #c7bce3;
+}
+.request-actions .played-action:disabled { cursor: default; opacity: 1; }
+.request-actions .clear-action { border-color: rgba(154,119,112,.48); color: #cba69e; }
 .empty-list { padding: 58px 20px; text-align: center; color: #837660; }
 .empty-list > span { color: #d2ad60; font-size: 40px; }
 .empty-list h3 { margin: 13px 0 7px; }
@@ -621,7 +637,7 @@ textarea {
   .change-pin > div { grid-column: 1 / -1; }
   .request-row { grid-template-columns: 10px 1fr 140px; }
   .request-time { grid-column: 2; }
-  .status-select { grid-column: 3; grid-row: 1 / span 2; }
+  .request-actions { grid-column: 3; grid-row: 1 / span 2; }
 }
 
 @media (max-width: 700px) {
@@ -640,7 +656,7 @@ textarea {
   .request-tools { grid-template-columns: 1fr 1fr; }
   .search-box { grid-column: 1 / -1; }
   .request-row { grid-template-columns: 9px 1fr; gap: 13px; padding: 17px 14px; }
-  .song-info, .request-time, .status-select { grid-column: 2; grid-row: auto; }
-  .status-select select { min-height: 48px; }
+  .song-info, .request-time, .request-actions { grid-column: 2; grid-row: auto; }
+  .request-actions button { min-height: 48px; }
   .back-link, .text-button { font-size: 8px; letter-spacing: .12em; }
 }

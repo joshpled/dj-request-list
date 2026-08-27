@@ -3,7 +3,7 @@
 import QRCode from 'qrcode';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
-type Status = 'New' | 'Approved' | 'Played' | 'Declined';
+type Status = 'New' | 'Played';
 type SongRequest = {
   id: string;
   song_title: string;
@@ -22,7 +22,7 @@ type Settings = {
 };
 type AdminData = { settings: Settings; requests: SongRequest[] };
 
-const statusOrder: Status[] = ['New', 'Approved', 'Played', 'Declined'];
+const statusOrder: Status[] = ['New', 'Played'];
 
 function dateTimeLocal(value: string | null) {
   if (!value) return '';
@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [qrCode, setQrCode] = useState('');
   const [saving, setSaving] = useState(false);
+  const [requestAction, setRequestAction] = useState<string | null>(null);
 
   const loadData = useCallback(async (quiet = false) => {
     try {
@@ -113,18 +114,42 @@ export default function AdminPage() {
     setData(null);
   }
 
-  async function updateStatus(id: string, status: Status) {
+  async function markPlayed(id: string) {
     const previous = data;
+    setRequestAction(id);
+    setMessage('');
     setData((current) => current ? {
       ...current,
-      requests: current.requests.map((request) => request.id === id ? { ...request, status } : request),
+      requests: current.requests.map((request) => request.id === id ? { ...request, status: 'Played' } : request),
     } : current);
-    const response = await fetch(`/api/admin/requests/${id}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`/api/admin/requests/${id}`, { method: 'PATCH' });
+      if (!response.ok) throw new Error('Played action failed');
+    } catch {
       setData(previous);
-      setMessage('That status change did not save.');
+      setMessage('The request could not be marked as played.');
+    } finally {
+      setRequestAction(null);
+    }
+  }
+
+  async function clearRequest(request: SongRequest) {
+    if (!window.confirm(`Clear “${request.song_title}” from the request list? This cannot be undone.`)) return;
+    const previous = data;
+    setRequestAction(request.id);
+    setMessage('');
+    setData((current) => current ? {
+      ...current,
+      requests: current.requests.filter((item) => item.id !== request.id),
+    } : current);
+    try {
+      const response = await fetch(`/api/admin/requests/${request.id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Clear action failed');
+    } catch {
+      setData(previous);
+      setMessage('The request could not be cleared.');
+    } finally {
+      setRequestAction(null);
     }
   }
 
@@ -206,7 +231,7 @@ export default function AdminPage() {
       </section>
 
       <section className="stat-grid" aria-label="Request totals">
-        {statusOrder.map((status) => <button key={status} className={`stat-card ${filter === status ? 'selected' : ''}`} onClick={() => setFilter(filter === status ? 'All' : status)}><span>{status}</span><strong>{totals[status]}</strong><small>{status === 'New' ? 'awaiting review' : `${status.toLowerCase()} requests`}</small></button>)}
+        {statusOrder.map((status) => <button key={status} className={`stat-card ${filter === status ? 'selected' : ''}`} onClick={() => setFilter(filter === status ? 'All' : status)}><span>{status}</span><strong>{totals[status]}</strong><small>{status === 'New' ? 'ready for the DJ' : 'kept until cleared'}</small></button>)}
       </section>
 
       {settingsOpen && (
@@ -252,7 +277,10 @@ export default function AdminPage() {
               <div className={`status-dot status-${request.status.toLowerCase()}`} aria-hidden="true" />
               <div className="song-info"><h3>{request.song_title}</h3><p>{request.artist}</p>{request.note && <blockquote>“{request.note}”</blockquote>}</div>
               <div className="request-time"><time dateTime={request.created_at}>{new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(request.created_at))}</time></div>
-              <label className={`status-select status-bg-${request.status.toLowerCase()}`}><span className="sr-only">Status for {request.song_title}</span><select value={request.status} onChange={(event) => updateStatus(request.id, event.target.value as Status)}>{statusOrder.map((status) => <option key={status}>{status}</option>)}</select></label>
+              <div className="request-actions" aria-label={`Actions for ${request.song_title}`}>
+                <button type="button" className={`played-action ${request.status === 'Played' ? 'is-played' : ''}`} onClick={() => markPlayed(request.id)} disabled={request.status === 'Played' || requestAction === request.id} aria-pressed={request.status === 'Played'}>Played</button>
+                <button type="button" className="clear-action" onClick={() => clearRequest(request)} disabled={requestAction === request.id}>Clear</button>
+              </div>
             </article>
           ))}
         </div>

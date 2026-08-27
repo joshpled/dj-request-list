@@ -1,7 +1,5 @@
-import { getD1, getSettings, initializeDb, type RequestStatus, type SongRequest } from './db';
+import { getD1, getSettings, initializeDb, type SongRequest } from './db';
 import { clientKey, hashPin, randomToken, safeEqual } from './security';
-
-const statuses: RequestStatus[] = ['New', 'Approved', 'Played', 'Declined'];
 
 function clean(value: unknown, max: number) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max) : '';
@@ -111,14 +109,23 @@ export async function getAdminData() {
       guestToken: settings.guest_token,
       pinVersion: settings.pin_version,
     },
-    requests: result.results,
+    requests: result.results.map((request) => ({
+      ...request,
+      status: request.status === 'Played' ? 'Played' as const : 'New' as const,
+    })),
   };
 }
 
-export async function setRequestStatus(id: string, status: unknown) {
-  if (typeof status !== 'string' || !statuses.includes(status as RequestStatus)) return false;
-  const result = await getD1().prepare('UPDATE song_requests SET status = ?, updated_at = ? WHERE id = ?')
-    .bind(status, new Date().toISOString(), id)
+export async function markRequestPlayed(id: string) {
+  const result = await getD1().prepare("UPDATE song_requests SET status = 'Played', updated_at = ? WHERE id = ?")
+    .bind(new Date().toISOString(), id)
+    .run();
+  return Boolean(result.meta.changes);
+}
+
+export async function removeSongRequest(id: string) {
+  const result = await getD1().prepare('DELETE FROM song_requests WHERE id = ?')
+    .bind(id)
     .run();
   return Boolean(result.meta.changes);
 }
