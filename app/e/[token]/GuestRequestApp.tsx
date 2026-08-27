@@ -189,7 +189,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
               <form className="request-form" onSubmit={submit} aria-labelledby="request-heading">
                 <h2 id="request-heading" className="sr-only">Request a song</h2>
                 <label>
-                  <span>Search for a song</span>
+                  <span>Search by song or artist</span>
                   <div className="song-search">
                     <input
                       value={songSearch}
