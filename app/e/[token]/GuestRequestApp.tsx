@@ -185,12 +185,9 @@ export default function GuestRequestApp({ token }: { token: string }) {
           </div>
         ) : (
           <>
-            <div className="title-block">
-              <p className="eyebrow">Tonight&apos;s feature presentation</p>
-              <h2 id="request-heading">What should we play next?</h2>
-            </div>
             {event && event.isOpen && !atLimit ? (
-              <form className="request-form" onSubmit={submit}>
+              <form className="request-form" onSubmit={submit} aria-labelledby="request-heading">
+                <h2 id="request-heading" className="sr-only">Request a song</h2>
                 <label>
                   <span>Search for a song</span>
                   <div className="song-search">
