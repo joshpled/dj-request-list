@@ -2,7 +2,11 @@
 
 An installable mobile guest request app with a PIN-protected DJ dashboard. This branch prepares the app for Cloudflare Workers with a D1 database in the owner's Cloudflare account, independent of OpenAI Sites.
 
-**Migration status: prepared locally, not published.** The original Sites version remains on `main` and has not been changed. The intended new address is `https://dj-request-list.joshuapleduc.workers.dev`; it is not live yet. No domain purchase is required for this address.
+**Migration status: published September 2, 2026.** The app is live at [dj-request-list.joshuapleduc.workers.dev](https://dj-request-list.joshuapleduc.workers.dev). The original Sites version remains on `main` and has not been changed. No domain purchase is required for this address.
+
+The owner approved publication and explicitly approved transferring private event data. Event settings and all three existing requests were copied into the owner's new Cloudflare D1 database. The current PIN hash/salt were retained after confirming they did not match the legacy setup credentials; the session secret was replaced and the session version advanced. No live data or secrets were saved into repository files.
+
+Live verification passed for protected admin access, the private guest page, scripts/styles, submission, Played/Clear, online artist search, and installation asset integrity. The temporary verification request was removed, and the three original requests were compared field-for-field with the source. Source settings and requests were unchanged at the final cutover check. Actual PIN entry was tested locally, not with the owner's plaintext PIN in production; Home Screen installation still needs a physical device check.
 
 ## Local development
 
@@ -49,9 +53,11 @@ The integration suite runs the compiled app in a local Cloudflare runtime with a
 
 The compatibility date is pinned to `2026-05-22`, supported by the locked local runtime. Upgrade the runtime dependencies and date together, then repeat these checks. Regenerate binding types with `npm run cf:types` after changing `wrangler.jsonc`.
 
-## Publishing checklist — requires owner approval
+## Publication and future deployments
 
-Do not deploy until the owner says **Publish**. There is no automatic deployment workflow. Pushing this branch to GitHub does not publish it.
+There is no automatic deployment workflow. Pushing this branch to GitHub does not publish it. The initial deployment used Cloudflare's documented direct-upload API through the connected account, including a temporary asset-upload token. Local Wrangler was not signed in. Future deployments may use the connected account again or normal `wrangler login`; do not extract or copy plugin OAuth credentials.
+
+The following checklist records the initial migration procedure. It is **already complete** except for the owner's device checks and distribution of new guest links. Do not repeat database creation or imports on the live database. Preserve existing hosted secrets on subsequent uploads.
 
 1. Confirm access to the intended Cloudflare account and that `dj-request-list` does not overwrite an existing Worker. The connected plugin's account access does not automatically sign the local Wrangler CLI in. Complete any required deployment authorization without copying OAuth tokens into files.
 2. Create a new D1 database named `dj-request-list`. Add its returned `database_id` to the `DB` binding in `wrangler.jsonc`. Keep `remote: false` so development uses local data.
@@ -62,7 +68,7 @@ Do not deploy until the owner says **Publish**. There is no automatic deployment
 7. Rebuild and dry-run, then deploy the compiled Worker and static assets using the new account/database only. Validate the public pages, PIN login, catalog, request submission, queue changes, and Home Screen behavior on the new origin. Use identifiable test requests and remove only those test requests afterward.
 8. Copy the new guest link and regenerate the QR code from the new dashboard. Installed Home Screen shortcuts must be added again because the origin changes. Browser/device cookies also restart, so per-device limits do not carry across origins. The two sites will not synchronize; use the new link for the event after cutover.
 
-Keep the old site as a fallback until the owner approves retiring it. Do not change the wedding-camera app. This branch contains no live event export, and no event data has been transferred yet.
+Keep the old site as a fallback until the owner approves retiring it. Do not change the wedding-camera app. This branch contains no live event export. The old and new sites do not synchronize; use the new dashboard to copy the new guest link and QR code.
 
 ## Hosting and privacy
 

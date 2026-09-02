@@ -20,6 +20,7 @@
     {
       "binding": "DB",
       "database_name": "dj-request-list",
+      "database_id": "bb1baa30-9e37-4c64-9a6b-c55c0febef55",
       "migrations_dir": "drizzle",
       "remote": false
     }
