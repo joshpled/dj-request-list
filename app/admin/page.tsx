@@ -1,6 +1,7 @@
 'use client';
 
 import QRCode from 'qrcode';
+import { errorMessage, readJsonObject } from '@/lib/json';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
 type Status = 'New' | 'Played';
@@ -61,6 +62,8 @@ export default function AdminPage() {
     }
   }, []);
 
+  // loadData updates state only after the asynchronous network request resolves.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadData(); }, [loadData]);
   useEffect(() => {
     if (!data) return;
@@ -101,8 +104,8 @@ export default function AdminPage() {
       const response = await fetch('/api/admin/session', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }),
       });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) return setMessage(result.error ?? 'Unable to unlock. Please try again.');
+      const result = await readJsonObject(response);
+      if (!response.ok) return setMessage(errorMessage(result, 'Unable to unlock. Please try again.'));
       setPin('');
       await loadData();
     } catch {
@@ -173,9 +176,9 @@ export default function AdminPage() {
     const response = await fetch('/api/admin/settings', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
     });
-    const result = await response.json();
+    const result = await readJsonObject(response);
     setSaving(false);
-    if (!response.ok) return setMessage(result.error ?? 'Settings did not save.');
+    if (!response.ok) return setMessage(errorMessage(result, 'Settings did not save.'));
     setMessage('Event settings saved.');
     await loadData(true);
   }
@@ -188,8 +191,8 @@ export default function AdminPage() {
     const response = await fetch('/api/admin/pin', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
     });
-    const result = await response.json();
-    if (!response.ok) return setMessage(result.error ?? 'PIN did not change.');
+    const result = await readJsonObject(response);
+    if (!response.ok) return setMessage(errorMessage(result, 'PIN did not change.'));
     form.reset();
     setData(null);
     setSettingsOpen(false);

@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     const response = await fetch(url, {
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'DJRequestList/1.0 (https://dj-request-list.joshled101.chatgpt.site)',
+        'User-Agent': 'DJRequestList/1.0 (https://dj-request-list.joshuapleduc.workers.dev)',
       },
     });
     if (!response.ok) throw new Error(`Catalog returned ${response.status}`);

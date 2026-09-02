@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import PwaRegistration from './PwaRegistration';
+import { SITE_ORIGIN } from '@/lib/site';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(SITE_ORIGIN),
   title: { default: 'DJ Request List', template: '%s · DJ Request List' },
   description: 'Send a song request straight to the DJ booth.',
   manifest: '/manifest.webmanifest',

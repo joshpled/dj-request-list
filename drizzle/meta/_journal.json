@@ -8,13 +8,6 @@
       "when": 1787854942950,
       "tag": "0000_sweet_white_queen",
       "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1787858061460,
-      "tag": "0001_secure_admin_pin",
-      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { readJsonObject } from '@/lib/json';
 import { getPublicEvent, submitSongRequest } from '@/lib/data';
 import { deviceCookie, isSameOrigin, randomToken, readCookie } from '@/lib/security';
 
@@ -20,10 +21,9 @@ export async function POST(request: Request, context: { params: Promise<{ token:
   if (!isSameOrigin(request)) return NextResponse.json({ error: 'Request blocked.' }, { status: 403 });
   const { token } = await context.params;
   const deviceId = getDevice(request);
-  const input = await request.json().catch(() => ({}));
+  const input = await readJsonObject(request);
   const result = await submitSongRequest(token, deviceId, input);
   const response = NextResponse.json(result.ok ? result : { error: result.error }, { status: result.ok ? 201 : result.status });
   if (!readCookie(request, 'dj_request_device')) response.headers.set('Set-Cookie', deviceCookie(request, deviceId));
   return response;
 }
-

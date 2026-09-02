@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { hashPin, randomToken } from './security';
+import { requireInitialPin } from './bootstrap';
 
 export type RequestStatus = 'New' | 'Approved' | 'Played' | 'Declined';
 
@@ -78,7 +79,7 @@ export async function initializeDb() {
   const current = await db.prepare('SELECT * FROM event_settings WHERE id = 1').first<EventSettings>();
   if (!current) {
     const now = new Date().toISOString();
-    const pin = await hashPin(env.INITIAL_ADMIN_PIN ?? '2468');
+    const pin = await hashPin(requireInitialPin(env.INITIAL_ADMIN_PIN));
     await db.prepare(`INSERT OR IGNORE INTO event_settings
       (id, event_name, welcome_message, request_limit, closing_time, guest_token, admin_pin_hash, admin_pin_salt, pin_version, session_secret, updated_at)
       VALUES (1, ?, ?, 5, NULL, ?, ?, ?, 1, ?, ?)`)

@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dj-request-list",
+  "account_id": "ec7f8caf1fdbac88db94d57e4bfdbb81",
+  "main": "vinext/server/app-router-entry",
+  // Match the locked workerd runtime; upgrade the toolchain and date together.
+  "compatibility_date": "2026-05-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "send_metrics": false,
+  "assets": { "binding": "ASSETS" },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": { "invocation_logs": false }
+  },
+  "secrets": { "required": ["INITIAL_ADMIN_PIN"] },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dj-request-list",
+      "migrations_dir": "drizzle",
+      "remote": false
+    }
+  ]
+}

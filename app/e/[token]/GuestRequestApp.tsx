@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { errorMessage, isRecord, readJsonObject } from '@/lib/json';
 
 type EventInfo = {
   eventName: string;
@@ -11,6 +12,20 @@ type EventInfo = {
 };
 
 type SongSuggestion = { id: string; title: string; artist: string };
+
+function isSongSuggestion(value: unknown): value is SongSuggestion {
+  return isRecord(value) && typeof value.id === 'string' && typeof value.title === 'string' && typeof value.artist === 'string';
+}
+
+function parseEvent(value: Record<string, unknown>): EventInfo {
+  if (typeof value.eventName !== 'string' || typeof value.requestLimit !== 'number' ||
+      typeof value.requestCount !== 'number' || typeof value.isOpen !== 'boolean' ||
+      (value.closingTime !== null && typeof value.closingTime !== 'string')) {
+    throw new Error('The event could not be loaded. Please try again.');
+  }
+  return { eventName: value.eventName, requestLimit: value.requestLimit, requestCount: value.requestCount,
+    isOpen: value.isOpen, closingTime: value.closingTime };
+}
 
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -39,7 +54,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
     fetch(`/api/guest/${encodeURIComponent(token)}`, { cache: 'no-store' })
       .then(async (response) => {
         if (!response.ok) throw new Error('This private event link is not active.');
-        return response.json();
+        return parseEvent(await readJsonObject(response));
       })
       .then(setEvent)
       .catch((caught: Error) => setError(caught.message))
@@ -49,6 +64,8 @@ export default function GuestRequestApp({ token }: { token: string }) {
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    // Read the browser-only install mode after hydration, preserving server markup.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStandalone(isStandalone);
     const handler = (browserEvent: Event) => {
       browserEvent.preventDefault();
@@ -86,9 +103,9 @@ export default function GuestRequestApp({ token }: { token: string }) {
         const response = await fetch(`/api/catalog?q=${encodeURIComponent(query)}`, {
           signal: controller.signal,
         });
-        const result = await response.json().catch(() => ({}));
+        const result = await readJsonObject(response);
         if (!response.ok) throw new Error('Catalog unavailable');
-        setSuggestions(Array.isArray(result.suggestions) ? result.suggestions : []);
+        setSuggestions(Array.isArray(result.suggestions) ? result.suggestions.filter(isSongSuggestion) : []);
       } catch (caught) {
         if (caught instanceof DOMException && caught.name === 'AbortError') return;
         setSuggestions([]);
@@ -117,10 +134,12 @@ export default function GuestRequestApp({ token }: { token: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? 'The request could not be sent.');
+      const result = await readJsonObject(response);
+      if (!response.ok) throw new Error(errorMessage(result, 'The request could not be sent.'));
+      const requestCount = result.requestCount;
+      if (typeof requestCount !== 'number') throw new Error('The confirmation could not be read. Please check before trying again.');
       setSubmitted({ song: String(payload.song), artist: String(payload.artist) });
-      setEvent((current) => current ? { ...current, requestCount: result.requestCount } : current);
+      setEvent((current) => current ? { ...current, requestCount } : current);
       setSongSearch('');
       setArtist('');
       setSuggestions([]);
@@ -231,7 +250,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
                     {suggestionsOpen && suggestions.length > 0 && (
                       <div className="song-suggestions" id="song-suggestions" role="listbox" aria-label="Song search results" tabIndex={0} key={songSearch}>
                         {suggestions.map((suggestion) => (
-                          <button key={suggestion.id} type="button" role="option" onClick={() => chooseSuggestion(suggestion)}>
+                          <button key={suggestion.id} type="button" role="option" aria-selected={false} onClick={() => chooseSuggestion(suggestion)}>
                             <strong>{suggestion.title}</strong>
                             <span>{suggestion.artist}</span>
                           </button>
