@@ -207,7 +207,16 @@ button {
   top: calc(100% + 7px);
   right: 0;
   left: 0;
-  overflow: hidden;
+  max-height: 320px;
+  max-height: min(320px, 45dvh);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-muted) #100c15;
+  scrollbar-gutter: stable;
   border: 1px solid rgba(200,157,80,.48);
   border-radius: 15px;
   background: #100c15;
@@ -230,6 +239,7 @@ button {
   letter-spacing: normal;
 }
 .song-suggestions button:last-child { border-bottom: 0; }
+.song-suggestions:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
 .song-suggestions button:hover,
 .song-suggestions button:focus-visible { background: rgba(200,157,80,.1); outline: none; }
 .song-suggestions strong { color: #f0d797; font: 17px Georgia, 'Times New Roman', serif; }

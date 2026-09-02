@@ -94,7 +94,7 @@ export async function GET(request: Request) {
       if (seen.has(key)) return [];
       seen.add(key);
       return [{ id, title, artist }];
-    }).slice(0, 8);
+    }).slice(0, 30);
 
     return NextResponse.json(
       { suggestions },

@@ -30,6 +30,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
   const [searchingCatalog, setSearchingCatalog] = useState(false);
   const [catalogUnavailable, setCatalogUnavailable] = useState(false);
   const skipNextCatalogSearch = useRef(false);
+  const songSearchRef = useRef<HTMLDivElement>(null);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [standalone, setStandalone] = useState(false);
@@ -58,6 +59,16 @@ export default function GuestRequestApp({ token }: { token: string }) {
   }, []);
 
   useEffect(() => {
+    function dismissOutsideSearch(pointerEvent: PointerEvent) {
+      if (!songSearchRef.current?.contains(pointerEvent.target as Node)) {
+        setSuggestionsOpen(false);
+      }
+    }
+    document.addEventListener('pointerdown', dismissOutsideSearch);
+    return () => document.removeEventListener('pointerdown', dismissOutsideSearch);
+  }, []);
+
+  useEffect(() => {
     const query = songSearch.trim();
     if (skipNextCatalogSearch.current) {
       skipNextCatalogSearch.current = false;
@@ -78,7 +89,6 @@ export default function GuestRequestApp({ token }: { token: string }) {
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error('Catalog unavailable');
         setSuggestions(Array.isArray(result.suggestions) ? result.suggestions : []);
-        setSuggestionsOpen(true);
       } catch (caught) {
         if (caught instanceof DOMException && caught.name === 'AbortError') return;
         setSuggestions([]);
@@ -146,6 +156,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
 
   function updateSongSearch(value: string) {
     setSongSearch(value);
+    setSuggestionsOpen(value.trim().length >= 2);
     if (value.trim().length < 2) {
       setSuggestions([]);
       setSuggestionsOpen(false);
@@ -190,12 +201,22 @@ export default function GuestRequestApp({ token }: { token: string }) {
                 <h2 id="request-heading" className="sr-only">Request a song</h2>
                 <label>
                   <span>Search by song or artist</span>
-                  <div className="song-search">
+                  <div
+                    className="song-search"
+                    ref={songSearchRef}
+                    onBlur={(blurEvent) => {
+                      if (blurEvent.relatedTarget && !blurEvent.currentTarget.contains(blurEvent.relatedTarget as Node)) {
+                        setSuggestionsOpen(false);
+                      }
+                    }}
+                    onKeyDown={(keyEvent) => {
+                      if (keyEvent.key === 'Escape') setSuggestionsOpen(false);
+                    }}
+                  >
                     <input
                       value={songSearch}
                       onChange={(change) => updateSongSearch(change.target.value)}
                       onFocus={() => setSuggestionsOpen(true)}
-                      onBlur={() => window.setTimeout(() => setSuggestionsOpen(false), 120)}
                       required
                       minLength={2}
                       maxLength={120}
@@ -208,7 +229,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
                     />
                     {searchingCatalog && <span className="search-spinner" aria-label="Searching song catalog" />}
                     {suggestionsOpen && suggestions.length > 0 && (
-                      <div className="song-suggestions" id="song-suggestions" role="listbox">
+                      <div className="song-suggestions" id="song-suggestions" role="listbox" aria-label="Song search results" tabIndex={0} key={songSearch}>
                         {suggestions.map((suggestion) => (
                           <button key={suggestion.id} type="button" role="option" onClick={() => chooseSuggestion(suggestion)}>
                             <strong>{suggestion.title}</strong>
@@ -218,7 +239,7 @@ export default function GuestRequestApp({ token }: { token: string }) {
                       </div>
                     )}
                   </div>
-                  <small className="field-hint">{catalogUnavailable ? 'Online suggestions are unavailable—enter the song and artist manually.' : 'Choose a catalog suggestion to fill the artist, or enter any song manually.'}</small>
+                  <small className="field-hint">{catalogUnavailable ? 'Online suggestions are unavailable—enter the song and artist manually.' : 'Scroll through the matches and choose a song, or enter one manually.'}</small>
                 </label>
                 <label><span>Artist</span><input name="artist" value={artist} onChange={(change) => setArtist(change.target.value)} required minLength={2} maxLength={120} placeholder="Who sings it?" autoComplete="off" /></label>
                 <label><span>Reason <em>optional</em></span><input name="note" maxLength={120} placeholder="Why this song?" /></label>
